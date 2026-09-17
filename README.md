@@ -6,4 +6,4 @@ After losing patience waiting for a "good" accelerometer to arrive, I ordered a 
 
 I switched to Arch for this project and after some difficulty managed to get a working STM32CubeProgrammer. I had hoped to use J-LinkCommander instead since it allows assembly debugging, but was disappointed to learn it only supports J-LINK. 
 
-Not having a tutorial, I consulted AI of course. It provided code that didn't work! Also it changed the pin assignments on me from one request to another, but I decided I liked the newer layout better, since used just one GPIO bank, and so rewired the board.
+Not having a tutorial, I consulted AI of course. It provided code that I merged into mine, but it didn't work! Also it changed the pin assignments on me from one request to another, but I decided I liked the newer layout better, since used just one GPIO bank, and so rewired the board. When I switched to Gemini proper instead of just google search, I received instructions with checkpoints and verify steps mixed in. I liked this and started over again, piecing in the new code chunks to see if the tests passed.
