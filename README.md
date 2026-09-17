@@ -5,3 +5,5 @@ After losing patience waiting for a "good" accelerometer to arrive, I ordered a 
 <img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/9d8dd31f-c06d-4c52-9682-24a86644f373" />
 
 I switched to Arch for this project and after some difficulty managed to get a working STM32CubeProgrammer. I had hoped to use J-LinkCommander instead since it allows assembly debugging, but was disappointed to learn it only supports J-LINK. 
+
+Not having a tutorial, I consulted AI of course. It provided code that didn't work! Also it changed the pin assignments on me from one request to another, but I decided I liked the newer layout better, since used just one GPIO bank, and so rewired the board.
