@@ -22,3 +22,4 @@ While it would have been a good time to study, learn, and rework what I had so f
 
 <img width="476" height="1746" alt="image" src="https://github.com/user-attachments/assets/c7c4e773-c097-4c22-83e3-ee30544e1751" />
 
+So with that success, now it is time to study and refactor the code, learning and vetting with the reference manuals, datasheets, and removing unneeded code.
