@@ -11,4 +11,9 @@ Not having a tutorial, I consulted AI of course. It provided code that I merged 
 I still had many issues however! Turns out I made a hilarious newbie mistake in electronics. I used double sided male header pins to connect the breakout board through its holes. This felt firm, so I thought I was good. But no, one needs to solder to actually get good electrical connections! Duh. 
 
 Here is the new image, with redone connections, including different pin assignments (GPIO A4-A7).
+
 <img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/e0ca9f57-6cde-4b73-8a94-56c1e3aa71d8" />
+
+That was progress, yet issues remained. I kept failing the sanity check of reading the chip id, getting 33 instead of 209. I tried many variations of AI generated code, with the plan of understanding and reworking it once I had a working starting point. Most failed, and I was even sent on some wild goose chases thinking I had a BMI270 instead! The issue seemed to be with the finicky requiring very special steps to trigger SPI mode instead of default I2C. I suspected the chip wasn't changing modes, and that resulted in some bits partially wrong on the returned number.
+
+Finally one permutation of code changes, just trying to shift into SPI and sanity check, worked! What was the difference?
