@@ -18,4 +18,7 @@ That was progress, yet issues remained. I kept failing the sanity check of readi
 
 Finally one permutation of code changes, just trying to shift into SPI and sanity check, worked! What was the difference? That is hard to say as there are a number of subtle differences in the many code versions I tried. I tested a few, including a very interesting use of internal pull-up resistor not in any of the other versions, but to no avail. 
 
-Next I decided to study, learn, and rework the working example.
+While it would have been a good time to study, learn, and rework what I had so far, I was impatient so close to the finish line so tried out AI suggestions to add in the accelerometer readings. They worked!
+
+<img width="476" height="1746" alt="image" src="https://github.com/user-attachments/assets/c7c4e773-c097-4c22-83e3-ee30544e1751" />
+
