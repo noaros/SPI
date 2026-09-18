@@ -16,4 +16,6 @@ Here is the new image, with redone connections, including different pin assignme
 
 That was progress, yet issues remained. I kept failing the sanity check of reading the chip id, getting 33 instead of 209. I tried many variations of AI generated code, with the plan of understanding and reworking it once I had a working starting point. Most failed, and I was even sent on some wild goose chases thinking I had a BMI270 instead! The issue seemed to be with the finicky requiring very special steps to trigger SPI mode instead of default I2C. I suspected the chip wasn't changing modes, and that resulted in some bits partially wrong on the returned number.
 
-Finally one permutation of code changes, just trying to shift into SPI and sanity check, worked! What was the difference?
+Finally one permutation of code changes, just trying to shift into SPI and sanity check, worked! What was the difference? That is hard to say as there are a number of subtle differences in the many code versions I tried. I tested a few, including a very interesting use of internal pull-up resistor not in any of the other versions, but to no avail. 
+
+Next I decided to study, learn, and rework the working example.
