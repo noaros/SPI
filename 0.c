@@ -45,15 +45,82 @@ int _write(int file, char *ptr, int len) {
 #define BMI160_EXPECTED_ID   0xD1
 #define BMI160_SPI_READ_BIT  0x80
 
+// Additional BMI160 Register Definitions
+#define BMI160_ACC_DATA_ADDR   0x12   // Start register for Acc X (LSB)
+#define BMI160_CMD_ADDR        0x7E   // Command Register
+#define BMI160_CMD_ACC_MODE_NORMAL 0x11 // Command to set Accel to Normal Mode
+
+
 // CS Pin Helpers (PA4)
 #define CS_LOW()   (GPIOA->BSRR = GPIO_BSRR_BR4)
 #define CS_HIGH()  (GPIOA->BSRR = GPIO_BSRR_BS4)
+
+// Structure to store raw 16-bit accelerometer readings
+typedef struct {
+    int16_t x;
+    int16_t y;
+    int16_t z;
+} bmi160_accel_t;
+
+uint8_t spi1_transfer(uint8_t data) {
+    // Wait until Transmit Buffer is Empty (TXE)
+    while (!(SPI1->SR & SPI_SR_TXE));
+
+    // Send Data
+    *(volatile uint8_t *)&SPI1->DR = data;
+
+    // Wait until Receive Buffer contains data (RXNE)
+    while (!(SPI1->SR & SPI_SR_RXNE));
+
+    // Read Data
+    return *(volatile uint8_t *)&SPI1->DR;
+}
+
+// Write a byte to a BMI160 register over SPI
+void bmi160_write_register(uint8_t reg, uint8_t value) {
+    CS_LOW();
+    spi1_transfer(reg & ~BMI160_SPI_READ_BIT); // Clear bit 7 for Write
+    spi1_transfer(value);
+    CS_HIGH();
+}
 
 void delay_ms(uint32_t ms) {
     for (volatile uint32_t i = 0; i < ms * 4000; i++) {
         __NOP();
     }
 }
+
+// Power up the Accelerometer into Normal Mode
+void bmi160_accel_init(void) {
+    // Write command 0x11 to register 0x7E
+    bmi160_write_register(BMI160_CMD_ADDR, BMI160_CMD_ACC_MODE_NORMAL);
+    
+    // Delay required for Accel power-up (~3.8ms according to BMI160 datasheet)
+    delay_ms(10);
+}
+
+// Read raw X, Y, Z accelerometer data
+void bmi160_read_accel(bmi160_accel_t *accel) {
+    uint8_t raw_buffer[6];
+
+    CS_LOW();
+    
+    // Address with bit 7 set for Read
+    spi1_transfer(BMI160_ACC_DATA_ADDR | BMI160_SPI_READ_BIT);
+    
+    // Burst-read 6 sequential bytes: [X_LSB, X_MSB, Y_LSB, Y_MSB, Z_LSB, Z_MSB]
+    for (int i = 0; i < 6; i++) {
+        raw_buffer[i] = spi1_transfer(0x00);
+    }
+    
+    CS_HIGH();
+
+    // Combine LSB and MSB into signed 16-bit integers
+    accel->x = (int16_t)((raw_buffer[1] << 8) | raw_buffer[0]);
+    accel->y = (int16_t)((raw_buffer[3] << 8) | raw_buffer[2]);
+    accel->z = (int16_t)((raw_buffer[5] << 8) | raw_buffer[4]);
+}
+
 
 void spi1_init(void) {
     // 1. Enable Clocks for GPIOA and SPI1
@@ -103,19 +170,6 @@ void spi1_init(void) {
     SPI1->CR1 |= SPI_CR1_SPE;
 }
 
-uint8_t spi1_transfer(uint8_t data) {
-    // Wait until Transmit Buffer is Empty (TXE)
-    while (!(SPI1->SR & SPI_SR_TXE));
-
-    // Send Data
-    *(volatile uint8_t *)&SPI1->DR = data;
-
-    // Wait until Receive Buffer contains data (RXNE)
-    while (!(SPI1->SR & SPI_SR_RXNE));
-
-    // Read Data
-    return *(volatile uint8_t *)&SPI1->DR;
-}
 
 uint8_t bmi160_read_chip_id(void) {
     uint8_t chip_id = 0;
@@ -144,7 +198,7 @@ void main() {
 
     *(volatile int *)0x20000004=0xaaaa;
 
-
+    bmi160_accel_t accel_data;
     spi1_init();
 
     // Force BMI160 into SPI mode by toggling CS line
@@ -159,12 +213,14 @@ void main() {
 
     *(volatile unsigned int *)0x20000004=chip_id;
 
+    bmi160_accel_init();
 again:
 	*(volatile int *)0x20000000 += 1;//heartbeat
 
 	
     printf("chip_id %d\r\n",chip_id);
-	// printf("Hello %d %d %d\r\n",accX,accY,accZ);
+    bmi160_read_accel(&accel_data);
+	printf("Hello %d %d %d\r\n",accel_data.x,accel_data.y,accel_data.z);
 wait:
 	while (!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)) {}
 	goto again;
