@@ -40,27 +40,22 @@ int _write(int file, char *ptr, int len) {
 	}
 }
 
-// BMI160 Register Definitions
 #define BMI160_CHIP_ID_ADDR  0x00
 #define BMI160_EXPECTED_ID   0xD1
 #define BMI160_SPI_READ_BIT  0x80
-
-// Additional BMI160 Register Definitions
 #define BMI160_ACC_DATA_ADDR   0x12   // Start register for Acc X (LSB)
 #define BMI160_CMD_ADDR        0x7E   // Command Register
-#define BMI160_CMD_ACC_MODE_NORMAL 0x11 // Command to set Accel to Normal Mode
-
+#define BMI160_CMD_ACC_MODE_NORMAL 0x11 
 
 // CS Pin Helpers (PA4)
 #define CS_LOW()   (GPIOA->BSRR = GPIO_BSRR_BR4)
 #define CS_HIGH()  (GPIOA->BSRR = GPIO_BSRR_BS4)
 
-// Structure to store raw 16-bit accelerometer readings
 typedef struct {
-    int16_t x;
-    int16_t y;
-    int16_t z;
-} bmi160_accel_t;
+    uint16_t x;
+    uint16_t y;
+    uint16_t z;
+} acc_t;
 
 uint8_t spi1_transfer(uint8_t data) {
     // Wait until Transmit Buffer is Empty (TXE)
@@ -100,7 +95,7 @@ void bmi160_accel_init(void) {
 }
 
 // Read raw X, Y, Z accelerometer data
-void bmi160_read_accel(bmi160_accel_t *accel) {
+void bmi160_read_accel(acc_t *accel) {
     uint8_t raw_buffer[6];
 
     CS_LOW();
@@ -196,9 +191,7 @@ void main() {
 	USART3->BRR = 16000000 / 115200;
 	USART3->CR1 |= (USART_CR1_UE | USART_CR1_TE);
 
-    *(volatile int *)0x20000004=0xaaaa;
-
-    bmi160_accel_t accel_data;
+    acc_t acc;
     spi1_init();
 
     // Force BMI160 into SPI mode by toggling CS line
@@ -215,12 +208,12 @@ void main() {
 
     bmi160_accel_init();
 again:
-	*(volatile int *)0x20000000 += 1;//heartbeat
+	*(volatile int *)0x20000000 -= 1;//heartbeat
 
 	
     printf("chip_id %d\r\n",chip_id);
-    bmi160_read_accel(&accel_data);
-	printf("Hello %d %d %d\r\n",accel_data.x,accel_data.y,accel_data.z);
+    bmi160_read_accel(&acc);
+	printf("Hello %d %d %d\r\n",acc.x,acc.y,acc.z);
 wait:
 	while (!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)) {}
 	goto again;
