@@ -8,5 +8,7 @@ I switched to Arch for this project and after some difficulty managed to get a w
 
 Not having a tutorial, I consulted AI of course. It provided code that I merged into mine, but it didn't work! Also it changed the pin assignments on me from one request to another, but I decided I liked the newer layout better, since used just one GPIO bank, and so rewired the board. When I switched to Gemini proper instead of just google search, I received instructions with checkpoints and verify steps mixed in. I liked this and started over again, piecing in the new code chunks to see if the tests passed.
 
-I still had many issues however! Turns out I made a hilarious newbie mistake in electronics. I used double sided male header pins to connect the breakout board through its holes. This felt firm, so I thought I was good. But no, one needs to solder to actually get good electrical connections! Duh. Here is the new image, with redone connections, including different pin assignments (GPIO A4-A7).
+I still had many issues however! Turns out I made a hilarious newbie mistake in electronics. I used double sided male header pins to connect the breakout board through its holes. This felt firm, so I thought I was good. But no, one needs to solder to actually get good electrical connections! Duh. 
 
+Here is the new image, with redone connections, including different pin assignments (GPIO A4-A7).
+<img width="1536" height="2048" alt="image" src="https://github.com/user-attachments/assets/e0ca9f57-6cde-4b73-8a94-56c1e3aa71d8" />
