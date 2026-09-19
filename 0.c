@@ -118,41 +118,17 @@ void bmi160_read_accel(acc_t *accel) {
 
 
 void spi1_init(void) {
-    // 1. Enable Clocks for GPIOA and SPI1
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
-
-    // 2. Configure PA4 as GPIO Output (Chip Select)
-    GPIOA->MODER &= ~(GPIO_MODER_MODE4);
-    GPIOA->MODER |=  (1U << GPIO_MODER_MODE4_Pos); // General Purpose Output
-
-    // 3. Configure PA5 (SCK), PA6 (MISO), PA7 (MOSI) as Alternate Function (AF5)
-    GPIOA->MODER &= ~(GPIO_MODER_MODE5 | GPIO_MODER_MODE6 | GPIO_MODER_MODE7);
-    GPIOA->MODER |=  (2U << GPIO_MODER_MODE5_Pos) | 
-                     (2U << GPIO_MODER_MODE6_Pos) | 
-                     (2U << GPIO_MODER_MODE7_Pos);
-
-    // Set AF5 (SPI1) in Alternate Function Low Register for Pins 5, 6, 7
-    GPIOA->AFR[0] &= ~((0xFU << GPIO_AFRL_AFSEL5_Pos) | 
-                       (0xFU << GPIO_AFRL_AFSEL6_Pos) | 
-                       (0xFU << GPIO_AFRL_AFSEL7_Pos));
-                       
-    GPIOA->AFR[0] |=  (5U << GPIO_AFRL_AFSEL5_Pos) | 
-                       (5U << GPIO_AFRL_AFSEL6_Pos) | 
-                       (5U << GPIO_AFRL_AFSEL7_Pos);
-
-    // Set High Speed for Pins PA4, PA5, PA6, PA7
-    GPIOA->OSPEEDR |= (3U << GPIO_OSPEEDR_OSPEED4_Pos) | 
-                      (3U << GPIO_OSPEEDR_OSPEED5_Pos) | 
-                      (3U << GPIO_OSPEEDR_OSPEED6_Pos) | 
-                      (3U << GPIO_OSPEEDR_OSPEED7_Pos);
-
-    // Enable Pull-up on MISO (PA6)
-    GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPD6);
-    GPIOA->PUPDR |=  (1U << GPIO_PUPDR_PUPD6_Pos);
+    GPIOA->MODER |=  1 << GPIO_MODER_MODE4_Pos; //PA4 output
+    // 3. Configure PA5 (SCK), PA6 (MISO), PA7 (MOSI) as Alternate Function
+    GPIOA->MODER |=  2 << GPIO_MODER_MODE5_Pos | 2 << GPIO_MODER_MODE6_Pos | 2 << GPIO_MODER_MODE7_Pos;
+    // Set them to AF5 (SPI1)                       
+    GPIOA->AFR[0] |=  5 << GPIO_AFRL_AFSEL5_Pos | 5 << GPIO_AFRL_AFSEL6_Pos | 5 << GPIO_AFRL_AFSEL7_Pos;
+    // In some other context might need to set 'high speed', set CS high, maybe use internal pullups for MISO or CS
 
     // Deselect peripheral
-    CS_HIGH();
+    // CS_HIGH();
 
     // 4. Configure SPI1 Peripheral
     // Master Mode, Software Slave Management (SSM/SSI set), Clock Divider = f_PCLK/16
