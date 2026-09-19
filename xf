@@ -1,0 +1,2 @@
+STM32_Programmer_CLI -c port=SWD -d 0.bin 0x08000000 -rst
+
