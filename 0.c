@@ -40,32 +40,16 @@ int _write(int file, char *ptr, int len) {
 	}
 }
 
-#define BMI160_EXPECTED_ID   0xD1
-#define DATA_ADDR   0x12   // Start register for Acc X (LSB)
-#define CMD_ADDR        0x7E   // Command Register
-#define MODE_NORMAL 0x11 
-
-// CS Pin Helpers (PA4)
-#define CS_LOW()   (GPIOA->BSRR = GPIO_BSRR_BR4)
-#define CS_HIGH()  (GPIOA->BSRR = GPIO_BSRR_BS4)
-
-typedef struct {
-    uint16_t x;
-    uint16_t y;
-    uint16_t z;
-} acc_t;
-
 uint8_t spi1_transfer(uint8_t data) {
     // Wait until Transmit Buffer is Empty (TXE)
     while (!(SPI1->SR & SPI_SR_TXE));
     // Send Data
-    *(volatile uint8_t *)&SPI1->DR = data;
+    *(uint8_t *)&SPI1->DR = data;
     // Wait until Receive Buffer contains data (RXNE)
     while (!(SPI1->SR & SPI_SR_RXNE));
     // Read Data
     return *(uint8_t *)&SPI1->DR;
 }
-
 
 void delay_ms(uint32_t ms) {
     for (volatile uint32_t i=0; i<ms* 4000; i++) {
@@ -73,6 +57,13 @@ void delay_ms(uint32_t ms) {
     }
 }
 
+#define ACC_ADDR 0x12 
+#define CMD_ADDR 0x7E 
+#define MODE_NORMAL 0x11 
+
+// set PA4 CS 
+#define CS_LOW()  GPIOA->BSRR = GPIO_BSRR_BR4
+#define CS_HIGH() GPIOA->BSRR = GPIO_BSRR_BS4
 
 void main() {
 	RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
@@ -111,12 +102,10 @@ void main() {
     CS_HIGH();
     delay_ms(5); //~3.8ms according to BMI160 datasheet
 again:
-	*(volatile int *)0x20000000 -= 1;//heartbeat
-	
+	*(volatile int *)0x20000000 += 1;//heartbeat
     printf("chip_id %d\r\n",chip_id);
     CS_LOW();
-    // Address with bit 7 set for Read
-    spi1_transfer(DATA_ADDR | 0x80);
+    spi1_transfer(ACC_ADDR | 0x80);//bit 7 for read
     // Burst-read 6 sequential bytes: [X_LSB, X_MSB, Y_LSB, Y_MSB, Z_LSB, Z_MSB]
     uint8_t raw_buffer[6];
     for (int i = 0; i < 6; i++) {
