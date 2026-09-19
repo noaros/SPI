@@ -123,19 +123,11 @@ again:
         raw_buffer[i] = spi1_transfer(0x00);
     }
     CS_HIGH();
-
-    // Combine LSB and MSB into signed 16-bit integers
-    int x,y,z;
-    x = (int16_t)((raw_buffer[1] << 8) | raw_buffer[0]);
-    y = (int16_t)((raw_buffer[3] << 8) | raw_buffer[2]);
-    z = (int16_t)((raw_buffer[5] << 8) | raw_buffer[4]);
-
-    printf("Hello %d %d %d\r\n",x,y,z);
+    int16_t *xyz = (uint16_t *)raw_buffer;//nifty, but breaks strict aliasing
+    printf("Hello %d %d %d\r\n",xyz[0],xyz[1],xyz[2]);
 wait:
 	while (!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)) {}
 	goto again;
 }
-
-//////
 
 
