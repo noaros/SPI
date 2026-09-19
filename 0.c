@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
-#include "stm32f429xx.h"
 #include <stdint.h>
-
-
+#include "stm32f429xx.h"
 
 // CS - PA4
 // SCLK - PA5
