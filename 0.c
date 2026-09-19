@@ -153,18 +153,12 @@ void main() {
     GPIOA->MODER |=  2 << GPIO_MODER_MODE5_Pos | 2 << GPIO_MODER_MODE6_Pos | 2 << GPIO_MODER_MODE7_Pos;
     // Set them to AF5 (SPI1)                       
     GPIOA->AFR[0] |=  5 << GPIO_AFRL_AFSEL5_Pos | 5 << GPIO_AFRL_AFSEL6_Pos | 5 << GPIO_AFRL_AFSEL7_Pos;
-    // In some other context might need to set 'high speed', set CS high, maybe use internal pullups for MISO or CS
-    CS_HIGH();
+    // In some other context might need to set 'high speed', maybe use internal pullups for MISO or CS
+    CS_HIGH();//deselects sensor while we configure spi (not actually needed per my testing), but also puts sensor into SPI mode
     // Master Mode, Software Slave Management (SSM/SSI set), Clock Divider = f_PCLK/16
     SPI1->CR1 = SPI_CR1_MSTR | SPI_CR1_SSM  | SPI_CR1_SSI  | 3 << SPI_CR1_BR_Pos;
     SPI1->CR1 |= SPI_CR1_SPE;// enable
 
-    // Force BMI160 into SPI mode by toggling CS line
-    // CS_HIGH();
-    // delay_ms(1);
-    // CS_LOW();
-    // delay_ms(1);
-    // CS_HIGH();
     delay_ms(10); // Latching delay for SPI mode init
 
     uint8_t chip_id = bmi160_read_chip_id();
