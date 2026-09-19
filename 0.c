@@ -118,27 +118,6 @@ void bmi160_read_accel(acc_t *accel) {
 
 
 void spi1_init(void) {
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
-    GPIOA->MODER |=  1 << GPIO_MODER_MODE4_Pos; //PA4 output
-    // 3. Configure PA5 (SCK), PA6 (MISO), PA7 (MOSI) as Alternate Function
-    GPIOA->MODER |=  2 << GPIO_MODER_MODE5_Pos | 2 << GPIO_MODER_MODE6_Pos | 2 << GPIO_MODER_MODE7_Pos;
-    // Set them to AF5 (SPI1)                       
-    GPIOA->AFR[0] |=  5 << GPIO_AFRL_AFSEL5_Pos | 5 << GPIO_AFRL_AFSEL6_Pos | 5 << GPIO_AFRL_AFSEL7_Pos;
-    // In some other context might need to set 'high speed', set CS high, maybe use internal pullups for MISO or CS
-
-    // Deselect peripheral
-    // CS_HIGH();
-
-    // 4. Configure SPI1 Peripheral
-    // Master Mode, Software Slave Management (SSM/SSI set), Clock Divider = f_PCLK/16
-    SPI1->CR1 = SPI_CR1_MSTR |
-                SPI_CR1_SSM  |
-                SPI_CR1_SSI  |
-                (3U << SPI_CR1_BR_Pos); // BR[2:0] = 011 -> PCLK/16
-
-    // Enable SPI Peripheral
-    SPI1->CR1 |= SPI_CR1_SPE;
 }
 
 
@@ -167,15 +146,25 @@ void main() {
 	USART3->BRR = 16000000 / 115200;
 	USART3->CR1 |= (USART_CR1_UE | USART_CR1_TE);
 
-    acc_t acc;
-    spi1_init();
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+    GPIOA->MODER |=  1 << GPIO_MODER_MODE4_Pos; //PA4 output
+    // 3. Configure PA5 (SCK), PA6 (MISO), PA7 (MOSI) as Alternate Function
+    GPIOA->MODER |=  2 << GPIO_MODER_MODE5_Pos | 2 << GPIO_MODER_MODE6_Pos | 2 << GPIO_MODER_MODE7_Pos;
+    // Set them to AF5 (SPI1)                       
+    GPIOA->AFR[0] |=  5 << GPIO_AFRL_AFSEL5_Pos | 5 << GPIO_AFRL_AFSEL6_Pos | 5 << GPIO_AFRL_AFSEL7_Pos;
+    // In some other context might need to set 'high speed', set CS high, maybe use internal pullups for MISO or CS
+    CS_HIGH();
+    // Master Mode, Software Slave Management (SSM/SSI set), Clock Divider = f_PCLK/16
+    SPI1->CR1 = SPI_CR1_MSTR | SPI_CR1_SSM  | SPI_CR1_SSI  | 3 << SPI_CR1_BR_Pos;
+    SPI1->CR1 |= SPI_CR1_SPE;// enable
 
     // Force BMI160 into SPI mode by toggling CS line
-    CS_HIGH();
-    delay_ms(1);
-    CS_LOW();
-    delay_ms(1);
-    CS_HIGH();
+    // CS_HIGH();
+    // delay_ms(1);
+    // CS_LOW();
+    // delay_ms(1);
+    // CS_HIGH();
     delay_ms(10); // Latching delay for SPI mode init
 
     uint8_t chip_id = bmi160_read_chip_id();
@@ -188,6 +177,8 @@ again:
 
 	
     printf("chip_id %d\r\n",chip_id);
+    acc_t acc;
+
     bmi160_read_accel(&acc);
 	printf("Hello %d %d %d\r\n",acc.x,acc.y,acc.z);
 wait:
