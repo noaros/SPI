@@ -159,7 +159,7 @@ void main() {
     SPI1->CR1 = SPI_CR1_MSTR | SPI_CR1_SSM  | SPI_CR1_SSI  | 3 << SPI_CR1_BR_Pos;
     SPI1->CR1 |= SPI_CR1_SPE;// enable
 
-    delay_ms(10); // Latching delay for SPI mode init
+    delay_ms(1); // Latching delay for SPI mode init
 
     uint8_t chip_id = bmi160_read_chip_id();
 
